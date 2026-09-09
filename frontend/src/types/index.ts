@@ -144,6 +144,15 @@ export interface UploadIntentResponse {
   publicUrl: string;
 }
 
+export interface StorageQuota {
+  totalBytesUsed: number;
+  maxFreeBytes: number;
+  usagePercentage: number;
+  uploadAllowed: boolean;
+  formattedUsed: string;
+  formattedLimit: string;
+}
+
 export interface DashboardSummary {
   totalProjects: number;
   publishedProjects: number;
@@ -153,4 +162,6 @@ export interface DashboardSummary {
   newEnquiries: number;
   totalEnquiries: number;
   recentProjects: ProjectSummary[];
+  storageQuota?: StorageQuota;
 }
+

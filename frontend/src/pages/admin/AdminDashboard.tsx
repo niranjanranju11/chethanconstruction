@@ -12,6 +12,8 @@ import {
   ArrowRight,
   Eye,
   Building,
+  HardDrive,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
@@ -100,6 +102,54 @@ export const AdminDashboard: React.FC = () => {
             </div>
             <div className="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-600 flex items-center justify-center">
               <Inbox className="w-6 h-6" />
+            </div>
+          </div>
+        </div>
+
+        {/* Cloudflare Free Tier Allowance & Storage Hard-Stop Monitor */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+                <HardDrive className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Cloudflare R2 Free Allowance & Storage Guard</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Automated protection against unexpected cloud bills. Uploads are capped at 10 GB to maintain ₹0 hosting cost forever.
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>₹0 Zero-Cost Hard-Stop Active</span>
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold">
+              <span className="text-slate-600">
+                Storage Used: <strong className="text-slate-900">{summary?.storageQuota?.formattedUsed || '0 MB'}</strong> of {summary?.storageQuota?.formattedLimit || '10.00 GB'}
+              </span>
+              <span className="text-indigo-600 font-bold">
+                {summary?.storageQuota?.usagePercentage || 0}%
+              </span>
+            </div>
+            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 rounded-full ${
+                  (summary?.storageQuota?.usagePercentage || 0) > 90
+                    ? 'bg-rose-500'
+                    : (summary?.storageQuota?.usagePercentage || 0) > 70
+                    ? 'bg-amber-500'
+                    : 'bg-gradient-to-r from-emerald-500 to-indigo-600'
+                }`}
+                style={{ width: `${Math.max(summary?.storageQuota?.usagePercentage || 0.5, 0.5)}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-400">
+              <span>Cloudflare Free Tier: 10 GB/month with $0 egress fees</span>
+              <span>{summary?.storageQuota?.uploadAllowed !== false ? '✅ Safe to Upload' : '⚠️ Storage Full — Uploads Paused'}</span>
             </div>
           </div>
         </div>

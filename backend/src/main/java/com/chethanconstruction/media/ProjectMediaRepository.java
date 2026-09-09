@@ -21,4 +21,7 @@ public interface ProjectMediaRepository extends JpaRepository<ProjectMedia, UUID
     void resetCoverForProject(@Param("projectId") UUID projectId);
 
     Optional<ProjectMedia> findByStorageKey(String storageKey);
+
+    @Query("SELECT COALESCE(SUM(m.sizeBytes), 0) FROM ProjectMedia m")
+    long getTotalStorageUsedBytes();
 }

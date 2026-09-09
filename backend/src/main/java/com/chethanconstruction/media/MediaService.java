@@ -68,6 +68,17 @@ public class MediaService {
                     HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
         }
 
+        // Free Tier Storage Hard-Stop Guard (10 GB Cloudflare R2 Free Limit)
+        long maxFreeBytes = 10L * 1024 * 1024 * 1024;
+        long currentStorageUsed = mediaRepository.getTotalStorageUsedBytes();
+        if (currentStorageUsed + request.getSizeBytes() > maxFreeBytes) {
+            throw new AppException(
+                    "Free storage allowance (10 GB) reached. Upload blocked automatically to guarantee ₹0 hosting cost. Delete older media to free up space.",
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR
+            );
+        }
+
         UUID mediaId = UUID.randomUUID();
         String extension = getExtension(request.getFilename(), contentType);
         String storageKey = String.format("projects/%s/%s/original.%s", projectId, mediaId, extension);
