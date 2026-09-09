@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: chethan-construction
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DB_URL
+        fromDatabase:
+          name: chethan-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_INITIAL_PASSWORD
+        generateValue: true
+      - key: R2_MOCK_MODE
+        value: "true"
+
+databases:
+  - name: chethan-db
+    plan: free
+    region: oregon
+    databaseName: chethan_db
+    user: chethan_user

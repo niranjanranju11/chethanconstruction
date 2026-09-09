@@ -90,7 +90,10 @@ public class SecurityConfig {
                         // Admin Protected Endpoints
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/auth/me").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        // Protected API requests
+                        .requestMatchers("/api/v1/**").authenticated()
+                        // Public static frontend assets and SPA routes
+                        .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
