@@ -1,0 +1,48 @@
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+frontend/.env
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Java / Maven / Backend
+backend/target/
+backend/*.jar
+backend/*.war
+backend/.mvn/timing.properties
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# IDE & System Files
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and Secrets
+.env
+*.env
+!*.env.example
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+build/
+bin/
+
+# Local databases and uploads
+data/
+backend/data/
