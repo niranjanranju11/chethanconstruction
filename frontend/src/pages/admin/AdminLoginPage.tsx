@@ -21,7 +21,13 @@ export const AdminLoginPage: React.FC = () => {
       await login(email, password);
       navigate('/admin');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid email address or password.');
+      if (err.response?.status === 401) {
+        setError('Invalid email address or password.');
+      } else if (!err.response) {
+        setError('Backend server offline or unreachable. Please use the pre-filled demo credentials to sign in.');
+      } else {
+        setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -104,10 +110,21 @@ export const AdminLoginPage: React.FC = () => {
             </button>
           </form>
 
-          <div className="pt-4 border-t border-slate-800 text-center">
-            <span className="text-[11px] text-slate-500">
+          <div className="pt-4 border-t border-slate-800 text-center space-y-1">
+            <span className="text-[11px] text-slate-400 block">
               Demo Credentials pre-filled for evaluation
             </span>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@chethanconstruction.com');
+                setPassword('AdminPassword123!');
+                setError(null);
+              }}
+              className="text-[11px] text-amber-500 hover:text-amber-400 underline cursor-pointer"
+            >
+              Reset to default demo credentials
+            </button>
           </div>
         </div>
       </div>

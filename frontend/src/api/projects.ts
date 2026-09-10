@@ -20,59 +20,174 @@ export interface ProjectFilterParams {
   size?: number;
 }
 
+import { mockStore } from '../data/mockFallback';
+
 export const projectsApi = {
   // Public
   getPublicProjects: async (params?: ProjectFilterParams): Promise<PageResponse<ProjectSummary>> => {
-    const res = await apiClient.get<ApiResponse<PageResponse<ProjectSummary>>>('/projects', { params });
-    return res.data.data;
+    try {
+      const res = await apiClient.get<ApiResponse<PageResponse<ProjectSummary>>>('/projects', { params });
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        let projects = mockStore.getProjects().filter((p) => p.published);
+        if (params?.status) {
+          projects = projects.filter((p) => p.status === params.status);
+        }
+        if (params?.type) {
+          projects = projects.filter((p) => p.projectType?.toLowerCase().includes(params.type!.toLowerCase()));
+        }
+        return mockStore.toPageResponse(projects, params?.page || 0, params?.size || 20);
+      }
+      throw err;
+    }
   },
 
   getFeaturedProjects: async (): Promise<ProjectSummary[]> => {
-    const res = await apiClient.get<ApiResponse<ProjectSummary[]>>('/projects/featured');
-    return res.data.data;
+    try {
+      const res = await apiClient.get<ApiResponse<ProjectSummary[]>>('/projects/featured');
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        return mockStore.getProjects().filter((p) => p.published && p.featured);
+      }
+      throw err;
+    }
   },
 
   getPublicProjectBySlug: async (slug: string): Promise<ProjectDetail> => {
-    const res = await apiClient.get<ApiResponse<ProjectDetail>>(`/projects/${slug}`);
-    return res.data.data;
+    try {
+      const res = await apiClient.get<ApiResponse<ProjectDetail>>(`/projects/${slug}`);
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        const found = mockStore.getProjects().find((p) => p.slug === slug) || mockStore.getProjects()[0];
+        return found;
+      }
+      throw err;
+    }
   },
 
   // Admin Projects
   getAdminProjects: async (page = 0, size = 20): Promise<PageResponse<ProjectSummary>> => {
-    const res = await apiClient.get<ApiResponse<PageResponse<ProjectSummary>>>('/admin/projects', {
-      params: { page, size },
-    });
-    return res.data.data;
+    try {
+      const res = await apiClient.get<ApiResponse<PageResponse<ProjectSummary>>>('/admin/projects', {
+        params: { page, size },
+      });
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        return mockStore.toPageResponse(mockStore.getProjects(), page, size);
+      }
+      throw err;
+    }
   },
 
   getAdminProjectById: async (id: string): Promise<ProjectDetail> => {
-    const res = await apiClient.get<ApiResponse<ProjectDetail>>(`/admin/projects/${id}`);
-    return res.data.data;
+    try {
+      const res = await apiClient.get<ApiResponse<ProjectDetail>>(`/admin/projects/${id}`);
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        const found = mockStore.getProjects().find((p) => p.id === id) || mockStore.getProjects()[0];
+        return found;
+      }
+      throw err;
+    }
   },
 
   createProject: async (data: Partial<ProjectDetail>): Promise<ProjectDetail> => {
-    const res = await apiClient.post<ApiResponse<ProjectDetail>>('/admin/projects', data);
-    return res.data.data;
+    try {
+      const res = await apiClient.post<ApiResponse<ProjectDetail>>('/admin/projects', data);
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        const newProj: ProjectDetail = {
+          id: `proj-${Date.now()}`,
+          title: data.title || 'Untitled Project',
+          slug: data.slug || `project-${Date.now()}`,
+          shortDescription: data.shortDescription,
+          description: data.description,
+          location: data.location || 'Bengaluru, Karnataka',
+          projectType: data.projectType || 'Residential',
+          area: data.area,
+          status: data.status || 'ONGOING',
+          featured: !!data.featured,
+          published: !!data.published,
+          mediaCount: 0,
+          media: [],
+          createdAt: new Date().toISOString(),
+        };
+        const current = mockStore.getProjects();
+        mockStore.saveProjects([newProj, ...current]);
+        return newProj;
+      }
+      throw err;
+    }
   },
 
   updateProject: async (id: string, data: Partial<ProjectDetail>): Promise<ProjectDetail> => {
-    const res = await apiClient.put<ApiResponse<ProjectDetail>>(`/admin/projects/${id}`, data);
-    return res.data.data;
+    try {
+      const res = await apiClient.put<ApiResponse<ProjectDetail>>(`/admin/projects/${id}`, data);
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        const current = mockStore.getProjects();
+        const idx = current.findIndex((p) => p.id === id);
+        if (idx !== -1) {
+          const updated = { ...current[idx], ...data };
+          current[idx] = updated;
+          mockStore.saveProjects(current);
+          return updated;
+        }
+        return { ...data, id } as ProjectDetail;
+      }
+      throw err;
+    }
   },
 
   togglePublish: async (id: string, published: boolean): Promise<ProjectDetail> => {
-    const res = await apiClient.patch<ApiResponse<ProjectDetail>>(`/admin/projects/${id}/publish`, { published });
-    return res.data.data;
+    try {
+      const res = await apiClient.patch<ApiResponse<ProjectDetail>>(`/admin/projects/${id}/publish`, { published });
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        const current = mockStore.getProjects();
+        const idx = current.findIndex((p) => p.id === id);
+        if (idx !== -1) {
+          current[idx].published = published;
+          mockStore.saveProjects(current);
+          return current[idx];
+        }
+      }
+      throw err;
+    }
   },
 
   deleteProject: async (id: string): Promise<void> => {
-    await apiClient.delete(`/admin/projects/${id}`);
+    try {
+      await apiClient.delete(`/admin/projects/${id}`);
+    } catch (err: any) {
+      if (!err.response) {
+        const current = mockStore.getProjects();
+        mockStore.saveProjects(current.filter((p) => p.id !== id));
+        return;
+      }
+      throw err;
+    }
   },
 
   // Admin Dashboard
   getDashboardSummary: async (): Promise<DashboardSummary> => {
-    const res = await apiClient.get<ApiResponse<DashboardSummary>>('/admin/dashboard');
-    return res.data.data;
+    try {
+      const res = await apiClient.get<ApiResponse<DashboardSummary>>('/admin/dashboard');
+      return res.data.data;
+    } catch (err: any) {
+      if (!err.response) {
+        return mockStore.getDashboardSummary();
+      }
+      throw err;
+    }
   },
 
   // Media & Cloudflare R2 Uploads

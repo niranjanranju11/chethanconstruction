@@ -44,5 +44,5 @@ build/
 bin/
 
 # Local databases and uploads
-data/
+/data/
 backend/data/
